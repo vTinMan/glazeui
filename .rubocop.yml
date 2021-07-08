@@ -1,0 +1,31 @@
+require:
+  - rubocop-minitest
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - 'lib/glaze_ui/base_view_old.rb'
+  #   - 'lib/**/*'
+
+Metrics/MethodLength:
+  Max: 20
+  CountAsOne: ['array', 'hash', 'heredoc']
+
+Layout/LineLength:
+  Max: 100
+
+Style/EndOfLine:
+  EnforcedStyle: lf
+
+# TODO: add documentation
+Style/Documentation:
+  Enabled: false
+
+Layout/SpaceInsideStringInterpolation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false

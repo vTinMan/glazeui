@@ -1,39 +1,32 @@
 module GlazeUI
   class BaseController
 
-    # TODO
-    # attr_reader :form
+    # TODO: change term
+    attr_reader :current_view
 
-#     def initialize(form)
-#       @form = form
-#     end
-
+    def initialize(current_view)
+      @current_view = current_view
+    end
 
     def form
-      unless defined? current_view
-        # TODO warning...
-        puts "WARNING ..."
-        return nil
-      end
-      
-      activate
-      puts "\n get form from #{self}"
-      current_view.source
+      current_view.form
     end
 
-  private
+    def activate(part = nil)
+      part ||= :default
+      return if activator.nil? || activator.ui_activations[part].nil?
 
-    def activate
-      _ui_activations = activator.instance_variable_get(:@_ui_activations)
-      puts "\n\n _ui_activations"
-      p _ui_activations
+      puts "\n\n activator.ui_activations"
+      p activator.ui_activations
       puts "\n\n"
-      self.instance_eval &_ui_activations[:default]
-#       _ui_activationss = self.class.ancestors.map {|it| it.instance_variable_get(:@_ui_activations) if it.is_a?(GlazeUI::BaseActivator) }.reject(&:nil?)
-#       _ui_activationss.each do |_ui_activations|
-#         self.instance_eval &_ui_activations[:default]
-#       end
+      instance_eval &activator.ui_activations[part]
+      # if it.is_a?(GlazeUI::BaseActivator) }.reject(&:nil?)
+      # _ui_activationss =
+      #   self.class.ancestors
+      #             .map { |it| it.instance_variable_get(:@_ui_activations)
+      # _ui_activationss.each do |_ui_activations|
+      # self.instance_eval &_ui_activations[:default]
+      # end
     end
-
   end
 end
