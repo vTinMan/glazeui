@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GlazeUI
   class Application
     attr_reader :gtk_app,
@@ -15,7 +17,7 @@ module GlazeUI
       @gtk_app = Gtk::Application.new(@configuration.application_name, @configuration.flags)
       @main_application_view = GlazeUI::MainWindowView.new(@configuration)
       @main_view = @configuration.main_view_class.new if @configuration.main_view_class
-      @main_controller = GlazeUI::ACTIVATORS[@configuration.main_view_class]
+      @main_controller = GlazeUI::ActivationKit::ACTIVATORS[@configuration.main_view_class]
     end
 
     # class ApplicationConfigError < StandardError; end
@@ -24,7 +26,7 @@ module GlazeUI
       # raise ApplicationConfigError,
       #   'Configure your main controller class before running application'
       @gtk_app.signal_connect('activate') do
-        @main_application_view.render.show_all
+        @main_application_view.form.show_all
       end
       # @main_application_view.signal_connect('destroy') { @gtk_app.main_quit }
       @gtk_app.run

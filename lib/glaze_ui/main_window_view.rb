@@ -1,16 +1,24 @@
+# frozen_string_literal: true
+
 module GlazeUI
   class MainWindowView < BaseView
-    attr_reader :app, :content_type, :config, :form
+    attr_reader :app, :content_type, :config
 
     def initialize(config)
+      super()
       @config = config
       @glaze_app = config.glaze_app
       @gtk_app = @glaze_app.gtk_app
     end
 
+    def form
+      @form ||= render
+    end
+
     def render
-      @form ||= @config.main_window_form if @config.main_window_form
-      @form ||= create_default_gtk_form
+      return @config.main_window_form if @config.main_window_form
+
+      create_default_gtk_form
     end
 
     def destroy
@@ -30,7 +38,7 @@ module GlazeUI
 
       if @glaze_app.main_controller
         main_controller = @glaze_app.main_controller.new(main_view)
-        main_controller.activate
+        main_controller.activate(nil)
       end
       default_form
     end

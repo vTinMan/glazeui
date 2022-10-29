@@ -1,8 +1,12 @@
-# Facade class providing DSL to use the toolkit methods to define and build a form parts
-# `render` method must be defined in child class to explain a form elements
+# frozen_string_literal: true
+
+# Facade class providing DSL to use the toolkit methods to define and build a form parts.
+# `render` method should be defined in child class to explain a form elements.
 module GlazeUI
   class BaseView < GLib::Object
     type_register
+
+    attr_reader :view_buffer
 
     def initialize
       super
@@ -10,73 +14,105 @@ module GlazeUI
     end
 
     def form
-      @form || assemble_form
+      return @form if defined? @form
+
+      render
+      @form = ViewKit::FormBuilder.build_form(@view_buffer)
+      ActivationKit::Initializer.new(self).call
+      @form
     end
 
     def refresh!(element_name)
       subview = @view_buffer.refresh_subview(element_name)
       ViewKit::FormBuilder.rebuild_subview(subview, @view_buffer)
-      activate(element_name)
-
-      # where should we call #show_all ???
+      ActivationKit::Initializer.new(self).call(subview)
       subview.element.show_all
       subview.element
     end
 
-    # adapter method to initialize subview and to attach the one to a builder form buffer
+    # method #add - adapter method to initialize subview and to attach the one to view buffer
+    #
+    # arguments:
+    # 1. element to add or element class to create instance and to add
+    # 2. name
+    #   - may be skipped
+    # 3. position
+    #   - may be skipped if default position is defined for class of parent element
+    #   - or if the added element is root
+    #
+    # Examples
+    #
+    #     # element itself
+    #     add Gtk::Fixed
+    #
+    #     add Gtk::Fixed.new
+    #
+    #     add Gtk::Fixed.new do |fixed|
+    #       # setting and content...
+    #     end
+    #
+    #
+    #     # with position
+    #     add Gtk::Button.new(label: "my_button"), pos(:put, 10, 10)
+    #
+    #     add Gtk::TextView, pos(:put, 10, 10) do |button|
+    #       # setting and content...
+    #     end
+    #
+    #
+    #     # with name
+    #     add Gtk::Button.new(label: "my_button"), :my_button
+    #
+    #     add Gtk::TextView, :text_section do |text_section|
+    #       # "setting and content..."
+    #     end
+    #
+    #
+    #     # with name and position
+    #     add Gtk::Button.new(label: "my_button"), :my_fixed, pos(:put, 10, 10)
+    #
+    #     add Gtk::TextView, :text_section, pos(:put, 10, 10) do |text_section|
+    #       # setting and content...
+    #     end
     def add(element_or_klass, name_or_init_position = nil, init_position = nil, &block)
       subview = @view_buffer.attach_element(element_or_klass,
                                             name_or_init_position,
                                             init_position,
                                             &block)
-      define_named_element(subview.element_name) if subview.element_name
+      define_named_element(subview.name) if subview.name
+      subview.element
     rescue StandardError => e
-      # only when exception happened
       subview&.gtk_element&.destroy
       raise e
     end
 
+    # example
+    #     add Gtk::Box.new(:vertical) do |vbox|
+    #       # set current element position by #place
+    #       place :pack_start, expand: true, fill: true
+    #
+    #       # another elements position pick for each
+    #       add Gtk::Button.new(label: "my_button"), pos(:pack_start, expand: true, fill: true)
+    #       add Gtk::TextView do |section_text|
+    #         place :pack_start, expand: true, fill: true
+    #         # ...
+    #       end
+    #     end
     def position(pos_method, *pos_args)
       ViewKit::Position.new(pos_method, pos_args)
     end
 
     alias pos position
 
-    # add Gtk::Box.new(:vertical) do |vbox|
-    #   # set current element position by #place
-    #   place :pack_start, expand: true, fill: true
-    #
-    #   # another elements position pick for each
-    #   add Gtk::Button.new(label: "my_button"), pos(:pack_start, expand: true, fill: true)
-    #   add Gtk::TextView do |section_text|
-    #     place :pack_start, expand: true, fill: true
-    #     # ...
-    #   end
-    # end
     def place(pos_method, *pos_args)
-      # TODO: exception
-      # unless rendering_stack[@current_rendering_level]&.place_position.nil?
-      # raise ViewKit::PositionError, "double place error"
+      # TODO: delegate method to @view_buffer
       @view_buffer.current_place_position = ViewKit::Position.new(pos_method, pos_args)
+      # TODO: warning
+      # unless rendering_stack[@current_rendering_level]&.place_position.nil?
+      #   puts "WARNING: double place error"
     end
 
     private
-
-    def activate(element_name = nil)
-      activating_controller_class = ACTIVATORS[self.class]
-      if activating_controller_class
-        activating_controller = activating_controller_class.new(self)
-        activating_controller.activate(element_name)
-      end
-      true
-    end
-
-    def assemble_form
-      render
-      @form = ViewKit::FormBuilder.build_form(@view_buffer)
-      activate
-      @form
-    end
 
     # element naming
     def define_named_element(name)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Gem::Specification.new do |s|
   s.name        = 'GlazeUI'
   s.version     = '0.0.1.alpha'
@@ -9,4 +11,5 @@ Gem::Specification.new do |s|
   s.files       = ['lib/example.rb']
   s.homepage    = 'https://rubygems.org/gems/glaze_ui'
   s.metadata    = { 'source_code_uri' => 'https://github.com/vTinMan/glaze_ui' }
+  s.required_ruby_version = '>= 2.5.0'
 end

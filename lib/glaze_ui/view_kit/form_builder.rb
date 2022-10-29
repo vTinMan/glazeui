@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GlazeUI
   module ViewKit
     class FormBuilder
@@ -36,23 +38,13 @@ module GlazeUI
         return unless last_subview
 
         position = subview.init_position ||
-                  subview.place_position ||
-                  default_position
+                   subview.place_position ||
+                   default_position
 
         last_subview.gtk_element.public_send(position.pos_method,
-                                            subview.gtk_element,
-                                            *position.pos_args)
-
-        # activate(subview.element)
+                                             subview.gtk_element,
+                                             *position.pos_args)
       end
-
-      # def activate(view_element)
-      #   # TODO: refresh, skip if view_element activated already
-      #   return unless ACTIVATORS[view_element.class]
-      #   activating_controller =
-      #     ACTIVATORS[view_element.class].new(view_element)
-      #   activating_controller.activate
-      # end
 
       # default placement setting for some element classes
       def default_position

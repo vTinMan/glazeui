@@ -3,9 +3,6 @@ require:
 
 AllCops:
   NewCops: enable
-  Exclude:
-    - 'lib/glaze_ui/base_view_old.rb'
-  #   - 'lib/**/*'
 
 Metrics/MethodLength:
   Max: 20
@@ -17,14 +14,19 @@ Layout/LineLength:
 Style/EndOfLine:
   EnforcedStyle: lf
 
+Metrics/AbcSize:
+  Exclude:
+    - 'test/**/*'
+
 # TODO: add documentation
 Style/Documentation:
   Enabled: false
 
-Layout/SpaceInsideStringInterpolation:
+# TODO:
+Gemspec/RequireMFA:
   Enabled: false
 
-Style/FrozenStringLiteralComment:
+Layout/SpaceInsideStringInterpolation:
   Enabled: false
 
 Bundler/OrderedGems:

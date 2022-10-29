@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GlazeUI
   class ApplicationConfig
     DEFAULT_WINDOW_SIZE = [1280, 640].freeze

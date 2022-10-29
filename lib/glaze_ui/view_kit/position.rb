@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GlazeUI
   module ViewKit
     Position = Struct.new(:pos_method, :pos_args)

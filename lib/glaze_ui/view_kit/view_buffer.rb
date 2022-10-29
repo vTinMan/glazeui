@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GlazeUI
   module ViewKit
     class ViewBuffer
@@ -8,23 +10,23 @@ module GlazeUI
         @named_subviews = {}
       end
 
-      def [](element_name)
-        @named_subviews[element_name.to_s]
+      def [](name)
+        @named_subviews[name.to_s]
       end
 
       def attach_element(element_or_klass, name_or_init_position, init_position, &block)
         subview = Subview.create(element_or_klass,
-                                      name_or_init_position,
-                                      init_position,
-                                      &block)
+                                 name_or_init_position,
+                                 init_position,
+                                 &block)
         add(subview)
         elaborate(subview) if subview.content_block
-        save_named_subview(subview) if subview.element_name
+        save_named_subview(subview) if subview.name
         subview
       end
 
-      def refresh_subview(element_name)
-        subview = self[element_name]
+      def refresh_subview(name)
+        subview = self[name]
         raise ArgumentError, 'element not found' if subview.nil?
 
         subview.reset_subviews!
@@ -53,7 +55,7 @@ module GlazeUI
 
         @subview_stack.length.zero? &&
           (finished_subview.init_position || finished_subview.place_position) and
-          puts 'WARNING: position is not able to apply for source element'
+          puts 'WARNING: position is acceptable to source element'
       end
 
       def last_subview
@@ -61,8 +63,7 @@ module GlazeUI
       end
 
       def save_named_subview(subview)
-        name = subview.element_name.to_s
-        @named_subviews[name] = subview
+        @named_subviews[subview.name.to_s] = subview
       end
     end
   end
