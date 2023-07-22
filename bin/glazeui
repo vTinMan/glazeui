@@ -1,0 +1,187 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+class CommandManager
+  COMMANDS = %w[create help].freeze
+
+  class CommandArgumentError < StandardError; end
+
+  def initialize(origin_args)
+    @origin_args = origin_args
+    @other_args = origin_args.dup
+    @command = @other_args.shift
+    @command = 'help' unless COMMANDS.include?(@command)
+  end
+
+  def command_executor
+    case @command
+    when 'help'
+      HelpMessage.new
+    when 'create'
+      ProjectComposer.new(@other_args)
+    else
+      raise CommandArgumentError, "unexpected command #{@command}"
+    end
+  end
+end
+
+class HelpMessage
+  def call
+    puts "\n help message \n use 'create' command\n\n"
+  end
+end
+
+class ProjectComposer
+  module Sources
+    APPLICATION_RB =
+      <<~RUBY
+        require 'glazeui'
+
+        APP_PATH = File.expand_path("\#{File.dirname(__FILE__)}/..")
+
+        require File.join(%W(\#{APP_PATH} config boot views.rb))
+        require File.join(%W(\#{APP_PATH} config boot controllers.rb))
+
+        glaze_app = GlazeUI::Application.new
+        glaze_app.configurate do |config|
+          config.main_view_class = MainView::Form
+        end
+
+        glaze_app.run
+      RUBY
+
+    MAIN_VIEW_FORM =
+      <<~RUBY
+        module MainView
+          class Form < GlazeUI::BaseView
+            def render
+              add Gtk::Box.new(:vertical) do
+                add Gtk::Box.new(:vertical) do
+                  add Gtk::Button.new(label: "Hello"), :hello_button
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+    MAIN_VIEW_ACTIVATOR =
+      <<~RUBY
+        module MainView
+          module FormActivator
+            extend GlazeUI::BaseActivator
+            activate_view MainView::Form
+
+            activation do
+              view.hello_button.signal_connect "clicked", &self.method(:hello)
+            end
+          end
+        end
+      RUBY
+
+    MAIN_CONTROLLER =
+      <<~RUBY
+        class MainController < GlazeUI::BaseController
+          include MainView::FormActivator
+
+          def hello(button)
+            some_name = ['World', 'User', 'Computer', 'Everyone'].sample
+            button.label = "Hello, \#{some_name}!"
+          end
+        end
+      RUBY
+
+    BOOT_VIEWS =
+      <<~RUBY
+        activators = Dir["\#{APP_PATH}/app/views/**/*_activator.rb"]
+        forms = Dir["\#{APP_PATH}/app/views/**/*.rb"] - activators
+
+        (forms + activators).each do |path_to_file|
+          require path_to_file
+        end
+      RUBY
+
+    BOOT_CONTROLLERS =
+      <<~RUBY
+        Dir["\#{APP_PATH}/app/controllers/**/*.rb"].each do |path_to_file|
+          require path_to_file
+        end
+      RUBY
+  end
+
+  def initialize(argv)
+    @argv = argv.dup
+    @commands = []
+  end
+
+  def call
+    read_params
+    puts "\n Creating new project: #{@project_name}"
+    if !Dir.exist?(@project_name)
+      @commands << -> { Dir.mkdir(@project_name) }
+    elsif !@params.key?('-f')
+      raise CommandArgumentError,
+            "folder #{@project_name} already exists, add '-f' to use existing folder"
+    end
+
+    fill_new_project_commands
+    result = @commands.all?(&:call)
+    if result
+      puts "\n The project '#{@project_name}' has been created"
+    else
+      puts "\n Errors appeared, a project can not be created"
+    end
+  end
+
+  def read_params
+    raise CommandArgumentError, 'project_name expected' if @argv.empty?
+
+    @project_name = @argv.pop
+    params_a = []
+    # TODO: read more params
+    @argv.each_with_object(params_a) do |arg, params|
+      params << [] if arg =~ /^-/ && params.last.nil?
+      last_part = params.last
+      last_part << arg
+    end
+    @params = params_a.to_h
+  end
+
+  def fill_new_project_commands
+    folders = [
+      %w[config],
+      %w[config boot],
+      %w[app],
+      %w[app views],
+      %w[app views main_view],
+      %w[app controllers],
+      %w[lib]
+    ]
+    folders.each do |path_names|
+      @commands << -> { Dir.mkdir(File.join(@project_name, *path_names)) }
+    end
+
+    files = {
+      %w[config application.rb] => Sources::APPLICATION_RB,
+      %w[config boot views.rb] => Sources::BOOT_VIEWS,
+      %w[config boot controllers.rb] => Sources::BOOT_CONTROLLERS,
+      %w[app views main_view form.rb] => Sources::MAIN_VIEW_FORM,
+      %w[app views main_view form_activator.rb] => Sources::MAIN_VIEW_ACTIVATOR,
+      %w[app controllers main_controller.rb] => Sources::MAIN_CONTROLLER
+    }
+    files.each do |path_names, source|
+      file_name = File.join(@project_name, *path_names)
+      @commands << -> { File.write(file_name, source) }
+    end
+  end
+end
+
+begin
+  cm = CommandManager.new(ARGV)
+  ce = cm.command_executor
+  ce.call
+rescue CommandManager::CommandArgumentError => e
+  puts "command can not be executed: #{e.message}"
+  puts e.backtrace
+end

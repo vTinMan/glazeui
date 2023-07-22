@@ -34,11 +34,9 @@ module GlazeUI
       default_form.set_default_size(*form_size)
       default_form.set_title(@config.application_name) if @config.application_name
       main_view = @config.main_view_class.new if @config.main_view_class
-      default_form.add main_view.form if main_view
-
-      if @glaze_app.main_controller
-        main_controller = @glaze_app.main_controller.new(main_view)
-        main_controller.activate(nil)
+      if main_view
+        default_form.add main_view.form
+        main_view.form.show
       end
       default_form
     end

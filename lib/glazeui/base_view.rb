@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Facade class providing DSL to use the toolkit methods to define and build a form parts.
-# `render` method should be defined in child class to explain a form elements.
+# The class should be inherited by child view classes,
+# then `render` method should be defined in child class to explain a form elements.
 module GlazeUI
   class BaseView < GLib::Object
     type_register
@@ -22,15 +23,22 @@ module GlazeUI
       @form
     end
 
+    def content_element
+      form
+    end
+
+    def render
+      raise StandardError, 'method should be overridden'
+    end
+
     def refresh!(element_name)
       subview = @view_buffer.refresh_subview(element_name)
       ViewKit::FormBuilder.rebuild_subview(subview, @view_buffer)
       ActivationKit::Initializer.new(self).call(subview)
-      subview.element.show_all
       subview.element
     end
 
-    # method #add - adapter method to initialize subview and to attach the one to view buffer
+    # Method #add - adapter method to initialize subview and to attach an element to view buffer
     #
     # arguments:
     # 1. element to add or element class to create instance and to add
@@ -74,6 +82,7 @@ module GlazeUI
     #     add Gtk::TextView, :text_section, pos(:put, 10, 10) do |text_section|
     #       # setting and content...
     #     end
+    #
     def add(element_or_klass, name_or_init_position = nil, init_position = nil, &block)
       subview = @view_buffer.attach_element(element_or_klass,
                                             name_or_init_position,
@@ -81,12 +90,14 @@ module GlazeUI
                                             &block)
       define_named_element(subview.name) if subview.name
       subview.element
-    rescue StandardError => e
+    rescue StandardError
       subview&.gtk_element&.destroy
-      raise e
+      raise
     end
 
-    # example
+    # Element placing with methods position, pos, place
+    #
+    # examples
     #     add Gtk::Box.new(:vertical) do |vbox|
     #       # set current element position by #place
     #       place :pack_start, expand: true, fill: true
@@ -98,6 +109,7 @@ module GlazeUI
     #         # ...
     #       end
     #     end
+    #
     def position(pos_method, *pos_args)
       ViewKit::Position.new(pos_method, pos_args)
     end
@@ -105,16 +117,19 @@ module GlazeUI
     alias pos position
 
     def place(pos_method, *pos_args)
-      # TODO: delegate method to @view_buffer
       @view_buffer.current_place_position = ViewKit::Position.new(pos_method, pos_args)
-      # TODO: warning
-      # unless rendering_stack[@current_rendering_level]&.place_position.nil?
-      #   puts "WARNING: double place error"
+      # TODO: warning boudle call
+      # puts "WARNING: double place error"
+    end
+
+    def hide
+      @view_buffer.hide_current
     end
 
     private
 
-    # element naming
+    # Element naming for active_elements
+    #
     def define_named_element(name)
       return if respond_to? name
 

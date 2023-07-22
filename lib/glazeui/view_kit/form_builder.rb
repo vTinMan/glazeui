@@ -34,21 +34,25 @@ module GlazeUI
           make_subform(child_subview)
         end
         @subview_stack.pop
+        mount_subview(subview)
+      end
 
+      def mount_subview(subview)
         return unless last_subview
 
         position = subview.init_position ||
                    subview.place_position ||
                    default_position
 
-        last_subview.gtk_element.public_send(position.pos_method,
-                                             subview.gtk_element,
-                                             *position.pos_args)
+        last_subview.content_element.public_send(position.pos_method,
+                                                 subview.gtk_element,
+                                                 *position.pos_args)
+        subview.gtk_element.show unless subview.hidden
       end
 
       # default placement setting for some element classes
       def default_position
-        parent_element = last_subview.gtk_element
+        parent_element = last_subview.content_element
         return if parent_element.nil?
 
         case parent_element

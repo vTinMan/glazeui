@@ -38,6 +38,10 @@ module GlazeUI
         last_subview.place_position = position
       end
 
+      def hide_current
+        last_subview.hidden = true
+      end
+
       private
 
       def add(subview)

@@ -5,6 +5,7 @@ module GlazeUI
     def activate_view(view_class = nil, &block)
       raise ArgumentError if !block_given? && !(view_class < GlazeUI::BaseView)
 
+      @activator_configured = false unless defined?(@activator_configured)
       @activated_view = block if block_given?
       @activated_view ||= view_class
       configure_activator
@@ -27,7 +28,7 @@ module GlazeUI
       ui_activations.key?(name)
     end
 
-    def activate_delegators(*method_names)
+    def active_elements(*method_names)
       method_names.each do |method_name|
         module_eval(
           # def some_named_element(*args, &block)
@@ -45,7 +46,7 @@ module GlazeUI
     private
 
     def configure_activator
-      return if defined?(@activator_configured) && @activator_configured
+      return if @activator_configured
 
       @activator_configured = true
       module_eval <<-RUBY, __FILE__, __LINE__ + 1
