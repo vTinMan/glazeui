@@ -11,7 +11,7 @@ Metrics/MethodLength:
 Layout/LineLength:
   Max: 100
 
-Style/EndOfLine:
+Layout/EndOfLine:
   EnforcedStyle: lf
 
 Metrics/AbcSize:
@@ -26,8 +26,14 @@ Style/Documentation:
 Gemspec/RequireMFA:
   Enabled: false
 
+Lint/ScriptPermission:
+  Enabled: false
+
 Layout/SpaceInsideStringInterpolation:
   Enabled: false
 
 Bundler/OrderedGems:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
   Enabled: false

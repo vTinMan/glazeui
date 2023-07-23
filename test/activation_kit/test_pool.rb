@@ -14,6 +14,7 @@ class TestPool < Minitest::Test
   def test_add_activator
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class1, @controller_class1)
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class2, @controller_class2)
+
     assert_equal(2, GlazeUI::ActivationKit::ACTIVATORS.activators.length)
     assert_includes(GlazeUI::ActivationKit::ACTIVATORS.activators.to_a,
                     [@view_class1, @controller_class1])
@@ -24,6 +25,7 @@ class TestPool < Minitest::Test
   def test_defined_for
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class1, @controller_class1)
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class2, @controller_class2)
+
     assert(GlazeUI::ActivationKit::ACTIVATORS.defined_for?(@view_class1))
     assert(GlazeUI::ActivationKit::ACTIVATORS.defined_for?(@view_class2))
     refute(GlazeUI::ActivationKit::ACTIVATORS.defined_for?(@view_class3))
@@ -32,6 +34,7 @@ class TestPool < Minitest::Test
   def test_getter
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class1, @controller_class1)
     GlazeUI::ActivationKit::ACTIVATORS.add_activator(@view_class2, @controller_class2)
+
     assert_equal(@controller_class1, GlazeUI::ActivationKit::ACTIVATORS[@view_class1])
     assert_equal(@controller_class2, GlazeUI::ActivationKit::ACTIVATORS[@view_class2])
     assert_nil GlazeUI::ActivationKit::ACTIVATORS[@view_class3]

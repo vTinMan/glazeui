@@ -15,13 +15,13 @@ class TestInitializer < Minitest::Test
   def setup_view_class
     @view_class = Class.new(GlazeUI::BaseView) do
       def render
-        add Gtk::Box.new(:vertical), :hello do
-          add Gtk::Box.new(:vertical) do
-            add Gtk::Box.new(:vertical), :lets_go do
-              add Gtk::Box.new(:vertical), :allright
+        add GUI_MODULE::Box.new(:vertical), :hello do
+          add GUI_MODULE::Box.new(:vertical) do
+            add GUI_MODULE::Box.new(:vertical), :lets_go do
+              add GUI_MODULE::Box.new(:vertical), :allright
             end
           end
-          add Gtk::Box.new(:vertical), :one_more
+          add GUI_MODULE::Box.new(:vertical), :one_more
         end
       end
     end
@@ -46,14 +46,17 @@ class TestInitializer < Minitest::Test
 
   def test_activation_order
     @initializer.call
+
     assert_equal(%i[default hello lets_go allright one_more], @activation_queue)
   end
 
   def test_partial_activation
     @initializer.call(@view.view_buffer[:hello])
+
     assert_equal(%i[hello lets_go allright one_more], @activation_queue)
     @activation_queue.clear
     @initializer.call(@view.view_buffer[:lets_go])
+
     assert_equal(%i[lets_go allright], @activation_queue)
   end
 end

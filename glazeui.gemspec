@@ -12,8 +12,7 @@ Gem::Specification.new do |s|
   s.bindir = 'bin'
   s.executables << 'glazeui'
   s.homepage = 'https://github.com/vTinMan/glazeui'
-  # TODO: s.homepage = 'https://rubygems.org/gems/glazeui'
   s.metadata = { 'source_code_uri' => 'https://github.com/vTinMan/glazeui' }
-  s.required_ruby_version = '>= 2.5.0'
-  s.add_runtime_dependency 'gtk3', '~> 3.0', '>= 3.0.0'
+  s.required_ruby_version = '>= 2.3.0'
+  s.add_runtime_dependency 'gtk3', '~> 4.0'
 end
