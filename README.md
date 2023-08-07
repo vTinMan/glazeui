@@ -25,24 +25,24 @@ Go into new project folder and start application
     cd new_project_name
     ruby config/application.rb
 
-## Features
+#### Features
 
-# Base classes for Controllers and Views
+##### Base classes for Controllers and Views
 
 The framework provides the classes underlying controllers and views
 
-# View DSL
+##### View DSL
 
-Simple DSL to describe a content largely compatible with [Gtk3 gem](https://rubygems.org/gems/gtk3)
+Simple DSL to describe the structure of a form content compatible with [Gtk3 gem](https://rubygems.org/gems/gtk3)
 
-# Activators
+##### Activators
 
 Ruby-style approach based on modules to connect view events and controller methods
 
-# Refreshing
+##### Refreshing
 
 The framework provides the way to re-render view (fully or partially) without reinitialization via `refresh!` method
 
-## Demo
+#### Demo
 
 Demo project is available [here](https://github.com/vTinMan/glazeui_demo)
