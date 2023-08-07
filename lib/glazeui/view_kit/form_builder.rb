@@ -55,21 +55,7 @@ module GlazeUI
         parent_element = last_subview.content_element
         return if parent_element.nil?
 
-        case parent_element
-        when Gtk::Box
-          Position.new :pack_start, [expand: false, fill: false]
-        when Gtk::Fixed
-          Position.new :put, [0, 0]
-        when Gtk::ApplicationWindow
-          Position.new :add
-        # TODO: other container elements
-        # when Gtk::TreeView
-        #   pos :attach, 0, 1, 0, 1
-        else
-          raise PositionError,
-                "default_position is not implemented for #{parent_element.class}. \
-                Use #position or #place for define element position"
-        end
+        Position.fetch_default(parent_element.class)
       end
     end
   end

@@ -2,6 +2,7 @@
 
 require 'minitest/autorun'
 require 'glazeui'
+require_relative 'test_support'
 
 # rubocop:disable Style/GuardClause, Style/ClassAndModuleChildren
 class Minitest::Test

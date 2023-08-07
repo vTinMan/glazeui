@@ -118,7 +118,7 @@ module GlazeUI
 
     def place(pos_method, *pos_args)
       @view_buffer.current_place_position = ViewKit::Position.new(pos_method, pos_args)
-      # TODO: warning boudle call
+      # TODO: warning double call
       # puts "WARNING: double place error"
     end
 

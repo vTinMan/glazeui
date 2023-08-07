@@ -55,11 +55,7 @@ module GlazeUI
         @subview_stack.push subview
         subview.content_block.call(subview.gtk_element)
       ensure
-        finished_subview = @subview_stack.pop
-
-        @subview_stack.length.zero? &&
-          (finished_subview.init_position || finished_subview.place_position) and
-          puts 'WARNING: position is acceptable to source element'
+        @subview_stack.pop
       end
 
       def last_subview
